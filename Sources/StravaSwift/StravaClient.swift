@@ -212,6 +212,10 @@ extension StravaClient: ASWebAuthenticationPresentationContextProviding {
 //MARK: - Athlete
 
 extension StravaClient {
+    
+    public func downloadGPX(id: Int, completion:@escaping (URL?)->Void){
+        try? oauthDownloadGPX(id: id, completion: completion)
+    }
 
     public func upload<T: Strava>(_ route: Router, upload: UploadData, result: @escaping (((T)?) -> Void), failure: @escaping (NSError) -> Void) {
         do {
@@ -237,6 +241,7 @@ extension StravaClient {
         do {
             try oauthRequest(route)?.responseStrava { (response: DataResponse<T>) in
                 // HTTP Status codes above 400 are errors
+                
                 if let statusCode = response.response?.statusCode, (400..<500).contains(statusCode) {
                     failure(self.generateError(failureReason: "Strava API Error", response: response.response))
                 } else {
@@ -298,6 +303,44 @@ extension StravaClient {
         return Alamofire.request(urlRequest)
     }
 
+    fileprivate func oauthDownloadGPX(id:Int, completion :@escaping  (URL?) -> Void ) throws  {
+        checkConfiguration()
+        //guard let url = try? urlRequest.asURLRequest().url?.absoluteString else { return }
+        //gpx = Router.routeGpx(id: 3079455406564743208)
+        guard let token = StravaClient.sharedInstance.token?.accessToken else {
+            return
+        }
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(token)"
+        ]
+        
+        guard let url = Router.routeGpx(id: id).urlRequest?.url?.absoluteString else {
+            return
+        }
+        
+      
+        Alamofire.download(url,  headers: headers).downloadProgress { progress in
+            print("Download progress: \(progress.fractionCompleted)")
+        }
+        .response { response in
+            if let error = response.error {
+                print(error)
+                
+            } else {
+                guard let url = response.temporaryURL else {
+                    return 
+                }
+                if let text = try? String(contentsOf: url, encoding: .utf8) {
+                    print(text)
+                }
+                    
+                completion(url)
+                
+            }
+        }
+        
+    }
+    
     fileprivate func oauthUpload<T: Strava>(URLRequest: URLRequestConvertible, upload: UploadData, completion: @escaping (DataResponse<T>) -> ()) {
         checkConfiguration()
 

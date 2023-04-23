@@ -89,10 +89,32 @@ extension DataRequest {
                 return .failure(e)
             }
 
+           
+            
             if let json = result?.value {
                 let object = T.init(JSON(json))
                 return .success(object)
             }
+            
+//            if let data = data {
+//                //charger le GPX ??
+//                print(data)
+//                if #available(iOS 16.0, *) {
+//                    let url = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+//                    do {
+//                        try data.write(to: url)
+//                        print("WROTE to  \(url)")
+//                        return .success(url as! T)
+//                        
+//                    } catch {
+//                        print("\(error.localizedDescription)")
+//                    }
+//                } else {
+//                    // Fallback on earlier versions
+//                }
+//                
+//            }
+            
 
             return .failure(generateError(failureReason: "StravaSerializer failed to serialize response.", response: response))
         }

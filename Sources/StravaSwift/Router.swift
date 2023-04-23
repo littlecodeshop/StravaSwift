@@ -324,6 +324,13 @@ public enum Router {
      - parameter id: the route id
      **/
     case routes(id: Id)
+    
+    /**
+    Retrieve GPX file of the route
+
+     - parameter id: the route id
+     **/
+    case routeGpx(id: Id)
 
     /**
      Lists a specific athlete’s routes. Private routes will only be included if the authenticating user is viewing their own routes and the token has view_private permissions.
@@ -551,6 +558,8 @@ extension Router {
             return ("/routes/\(id)", nil, .get)
         case .athleteRoutes(let id, let params):
             return ("/athletes/\(id)/routes", params, .get)
+        case .routeGpx(let id):
+            return ("/routes/\(id)/export_gpx", nil, .get)
 
         case .activityStreams(let id, let type):
               return ("/activities/\(id)/streams/\(type)", nil, .get)
