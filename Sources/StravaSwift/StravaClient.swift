@@ -11,6 +11,7 @@ import Foundation
 import Alamofire
 import SwiftyJSON
 import SafariServices
+import Foundation
 
 /**
  StravaClient responsible for making all api requests
@@ -103,7 +104,7 @@ extension StravaClient: ASWebAuthenticationPresentationContextProviding {
         } else {
             if #available(iOS 12.0, *) {
                 let webAuthenticationSession = ASWebAuthenticationSession(url: Router.webAuthorizationUrl,
-                                                                          callbackURLScheme: config?.redirectUri,
+                                                                          callbackURLScheme: config?.redirectUri.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!,
                                                                           completionHandler: { (url, error) in
                     if let url = url, error == nil {
                         self.handleAuthorizationRedirect(url, result: result)
@@ -307,39 +308,14 @@ extension StravaClient {
         checkConfiguration()
         //guard let url = try? urlRequest.asURLRequest().url?.absoluteString else { return }
         //gpx = Router.routeGpx(id: 3079455406564743208)
-        guard let token = StravaClient.sharedInstance.token?.accessToken else {
-            return
-        }
-        let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(token)"
-        ]
-        
-        guard let url = Router.routeGpx(id: id).urlRequest?.url?.absoluteString else {
-            return
-        }
-        
-      
-        Alamofire.download(url,  headers: headers).downloadProgress { progress in
-            print("Download progress: \(progress.fractionCompleted)")
-        }
-        .response { response in
-            if let error = response.error {
-                print(error)
-                
-            } else {
-                guard let url = response.temporaryURL else {
-                    return 
-                }
-                if let text = try? String(contentsOf: url, encoding: .utf8) {
-                    print(text)
-                }
-                    
-                completion(url)
-                
-            }
-        }
-        
+ 
+            
     }
+        
+   
+       
+        
+    
     
     fileprivate func oauthUpload<T: Strava>(URLRequest: URLRequestConvertible, upload: UploadData, completion: @escaping (DataResponse<T>) -> ()) {
         checkConfiguration()
