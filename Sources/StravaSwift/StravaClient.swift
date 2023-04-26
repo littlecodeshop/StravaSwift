@@ -299,6 +299,7 @@ extension StravaClient {
     }
 
     fileprivate func oauthRequest(_ urlRequest: URLRequestConvertible) throws -> DataRequest? {
+        print("MAKIG A API CALLL ")
         checkConfiguration()
 
         return Alamofire.request(urlRequest)
